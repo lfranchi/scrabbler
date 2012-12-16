@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Note: requires python 2.7 for argparse and nicer dictionary generator syntax {k:v for (k, v) in [..]}
+# Note: requires python 2.7 for argparse
 
 import sys, itertools, argparse, re
 from operator import itemgetter
