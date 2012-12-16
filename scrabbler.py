@@ -13,10 +13,6 @@ SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 
-# Note: First I had load_dict return a list of words that in the dictionary
-# Obviously that was horrifically slow as valid_words was doing an O(n) linear
-# search for each word. Switching it to using a set (which i assume internally is
-# implemented as a hash table) vastly improved things (yay O(1) lookups :)
 def load_dict(dictfile):
     """Load the given dictionary file---strip and lowercase each line, and insert it into the resulting set"""
     try:
