@@ -2,7 +2,7 @@
 
 # Note: requires python 2.7 for argparse and nicer dictionary generator syntax {k:v for (k, v) in [..]}
 
-import sys, itertools, argparse
+import sys, itertools, argparse, re
 from operator import itemgetter
 
 SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
@@ -38,17 +38,27 @@ def score_word(word):
     "Returns a score for the word"
     return sum([SCORES[c.lower()] for c in word])
 
+def in_wordlist(word, wordlist):
+    """Returns true if the word is in the wordlist. If the word has one or more wildcards,
+    this is forced to do a terribly slow linear search to match against each word individually."""
+    if '_' in word:
+        regex = word.replace('_', "[a-z]")
+        for word in wordlist:
+            if re.match(regex, word): return True
+        return False
+    else:
+        return word in wordlist
+
 def sorted_scored_words(chars, wordlist):
     """Returns a list of tuples (word, score) of valid scrabble words from a set of scrabble characters.
     The tuples are sorted in descending order, highest score first"""
     # Generate a dictionary of {word: score} pairs to eliminate duplicate words
     # Then sort the dictionary by value, converting the dict to a list of tuples and sorting by the second item
-    return sorted({perm: score_word(perm) for perm in permutations(chars) if perm in wordlist}.iteritems(), 
+    return sorted({perm: score_word(perm) for perm in permutations(chars) if in_wordlist(perm, wordlist)}.iteritems(), 
                   key=itemgetter(1),
                   reverse=True)
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description='A scrabble solver program')
     parser.add_argument("characters", help="The scrabble characters to use")
     parser.add_argument('--dict', action="store", default="sowpods.txt", metavar="wordlist", type=str, help="A user-supplied word list file")
