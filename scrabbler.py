@@ -2,7 +2,7 @@
 
 import sys, itertools
 
-scores = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
+SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
           "f": 4, "i": 1, "h": 4, "k": 5, "j": 8, "m": 3,
           "l": 1, "o": 1, "n": 1, "q": 10, "p": 3, "s": 1,
           "r": 1, "u": 1, "t": 1, "w": 4, "v": 4, "y": 4,
@@ -26,9 +26,14 @@ def permutations(chars):
         for perm in perms:
             yield "".join(perm)
 
+def score_word(word):
+    "Returns a score for the word"
+    return sum([SCORES[c.lower()] for c in word])
+
 def valid_words(chars, wordlist):
-    """Returns a list of valid scrabble words from a set of scrabble characters"""
-    return [perm for perm in permutations(chars) if perm in wordlist]
+    """Returns a list of tuples (score, word) of valid scrabble words from a set of scrabble characters.
+    The tuples are sorted in descending order, highest score first"""
+    return sorted({score_word(perm): perm for perm in permutations(chars) if perm in wordlist}.items(), reverse=True)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -43,3 +48,5 @@ if __name__ == "__main__":
     wordlist = load_dict("sowpods.txt")
     words = valid_words(chars, wordlist)
     print "Got number of words: %s" % len(words)
+    for score, word in words:
+        print "%s %s" % (score, word)
