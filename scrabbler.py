@@ -31,7 +31,7 @@ def score_word(word):
     "Returns a score for the word"
     return sum([SCORES[c.lower()] for c in word])
 
-def valid_words(chars, wordlist):
+def sorted_scored_words(chars, wordlist):
     """Returns a list of tuples (word, score) of valid scrabble words from a set of scrabble characters.
     The tuples are sorted in descending order, highest score first"""
     # Generate a dictionary of {word: score} pairs to eliminate duplicate words
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         exit(0)
 
     wordlist = load_dict("sowpods.txt")
-    words = valid_words(chars, wordlist)
+    words = sorted_scored_words(chars, wordlist)
     print "Got number of words: %s" % len(words)
     for word, score in words:
         print "%s %s" % (score, word)
