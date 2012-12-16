@@ -79,7 +79,7 @@ def sorted_scored_words(chars, wordlist):
     for permutation in permutations(chars):
         words = in_wordlist(permutation, wordlist) # Handle the fact that blanks might generate a lot of potential matching words
         for word in words:
-            scores[word] = score_word(word)
+            scores[word] = score_word(permutation) # Score the permutation (with blank tiles) since the are worth 0
     return sorted(scores.iteritems(), key=itemgetter(1), reverse=True)
 
 if __name__ == "__main__":
