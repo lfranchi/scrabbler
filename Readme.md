@@ -37,3 +37,5 @@ Which is already quite a nice improvement :)
 ## Future TODOs
 
 Needs unit testing. Usually i'd add unit tests before any optimizations or further tweaks---as the first thing after something barely works---but given the time constraints I omitted them. It's much nicer to optimize/refactor when you can easily verify your code still works by just running the tests....
+
+Further optimization work is definitely possible. expand_blanks is still the bottleneck, and it's not particularly efficient---recursively expanding the desired word. Turning it into an iterative function will probably help a bunch, as the cost for all the recursive calls is outweighing the work being done inside the function, I think.
