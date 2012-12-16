@@ -54,29 +54,33 @@ def expand_blanks(word):
     return expanded
 
 def in_wordlist(word, wordlist):
-    """Returns true if the word is in the wordlist. If the word has one or more wildcards,
-    this is forced to do a terribly slow linear search to match against each word individually."""
+    """Returns a truthy value if the word is in the wordlist. If the word has one or more wildcards,
+    this will return a list of all words that match the word list. If there is no wildcard, returns an
+    empty list."""
     if '_' in word:
+        found = []
         expanded = expand_blanks(word)
         for expanded_word in expanded:
             if expanded_word in wordlist:
-                return expanded_word
-        return None
+                found.append(expanded_word)
+        return found
     else:
         if word in wordlist:
-            return word
+            return [word]
         else:
-            return None
+            return []
 
 def sorted_scored_words(chars, wordlist):
     """Returns a list of tuples (word, score) of valid scrabble words from a set of scrabble characters.
     The tuples are sorted in descending order, highest score first"""
     # Generate a dictionary of {word: score} pairs to eliminate duplicate words
     # Then sort the dictionary by value, converting the dict to a list of tuples and sorting by the second item
-    return sorted({in_wordlist(perm, wordlist): score_word(in_wordlist(perm, wordlist)) 
-                    for perm in permutations(chars) if in_wordlist(perm, wordlist)}.iteritems(),
-                  key=itemgetter(1),
-                  reverse=True)
+    scores = {}
+    for permutation in permutations(chars):
+        words = in_wordlist(permutation, wordlist) # Handle the fact that blanks might generate a lot of potential matching words
+        for word in words:
+            scores[word] = score_word(word)
+    return sorted(scores.iteritems(), key=itemgetter(1), reverse=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='A scrabble solver program')
