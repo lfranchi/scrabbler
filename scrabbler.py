@@ -48,9 +48,11 @@ def expand_blanks(word):
     expanded = []
     for i in xrange(len(word)):
         if word[i] == '_':
-            w = [word[:i] + c + word[i+1:] for c in ALPHABET]
-            for word in w:
-                expanded.extend(expand_blanks(word))
+            for word in [word[:i] + c + word[i+1:] for c in ALPHABET]:
+                if not '_' in word:
+                    expanded.append(word)
+                else:
+                    expanded.extend(expand_blanks(word))
     return expanded
 
 def in_wordlist(word, wordlist):
