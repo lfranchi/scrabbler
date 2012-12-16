@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, itertools
+from operator import itemgetter
 
 SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
           "f": 4, "i": 1, "h": 4, "k": 5, "j": 8, "m": 3,
@@ -16,7 +17,7 @@ def load_dict(dictfile):
     f = open(dictfile, 'r')
     d = set()
     for line in f.readlines():
-        d.add(line.strip())
+        d.add(line.strip().lower())
     return d
 
 def permutations(chars):
@@ -31,16 +32,18 @@ def score_word(word):
     return sum([SCORES[c.lower()] for c in word])
 
 def valid_words(chars, wordlist):
-    """Returns a list of tuples (score, word) of valid scrabble words from a set of scrabble characters.
+    """Returns a list of tuples (word, score) of valid scrabble words from a set of scrabble characters.
     The tuples are sorted in descending order, highest score first"""
-    return sorted({score_word(perm): perm for perm in permutations(chars) if perm in wordlist}.items(), reverse=True)
+    # Generate a dictionary of {word: score} pairs to eliminate duplicate words
+    # Then sort the dictionary by value, converting the dict to a list of tuples and sorting by the second item
+    return sorted({perm: score_word(perm) for perm in permutations(chars) if perm in wordlist}.iteritems(), key=itemgetter(1), reverse=True)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Please call scrabbler with one argument, a list of characters to use"
         exit(0)
 
-    chars = sys.argv[1].upper()
+    chars = sys.argv[1].lower()
     if len(chars) != 7:
         print "Please only pass 7 characters, as a scrabble rack only has 7 tiles"
         exit(0)
@@ -48,5 +51,5 @@ if __name__ == "__main__":
     wordlist = load_dict("sowpods.txt")
     words = valid_words(chars, wordlist)
     print "Got number of words: %s" % len(words)
-    for score, word in words:
+    for word, score in words:
         print "%s %s" % (score, word)
