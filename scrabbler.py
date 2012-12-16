@@ -11,6 +11,8 @@ SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
           "r": 1, "u": 1, "t": 1, "w": 4, "v": 4, "y": 4,
           "x": 8, "z": 10, "_": 0}
 
+ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+
 # Note: First I had load_dict return a list of words that in the dictionary
 # Obviously that was horrifically slow as valid_words was doing an O(n) linear
 # search for each word. Switching it to using a set (which i assume internally is
@@ -38,23 +40,41 @@ def score_word(word):
     "Returns a score for the word"
     return sum([SCORES[c.lower()] for c in word])
 
+def expand_blanks(word):
+    """Recursively generate a list of expanded blanks---a list of all permutations possible
+    when replacing an _ by any character in the alphabet"""
+    if not '_' in word:
+        return [word]
+    expanded = []
+    for i in xrange(len(word)):
+        if word[i] == '_':
+            w = [word[:i] + c + word[i+1:] for c in ALPHABET]
+            for word in w:
+                expanded.extend(expand_blanks(word))
+    return expanded
+
 def in_wordlist(word, wordlist):
     """Returns true if the word is in the wordlist. If the word has one or more wildcards,
     this is forced to do a terribly slow linear search to match against each word individually."""
     if '_' in word:
-        regex = word.replace('_', "[a-z]")
-        for word in wordlist:
-            if re.match(regex, word): return True
-        return False
+        expanded = expand_blanks(word)
+        for expanded_word in expanded:
+            if expanded_word in wordlist:
+                return expanded_word
+        return None
     else:
-        return word in wordlist
+        if word in wordlist:
+            return word
+        else:
+            return None
 
 def sorted_scored_words(chars, wordlist):
     """Returns a list of tuples (word, score) of valid scrabble words from a set of scrabble characters.
     The tuples are sorted in descending order, highest score first"""
     # Generate a dictionary of {word: score} pairs to eliminate duplicate words
     # Then sort the dictionary by value, converting the dict to a list of tuples and sorting by the second item
-    return sorted({perm: score_word(perm) for perm in permutations(chars) if in_wordlist(perm, wordlist)}.iteritems(), 
+    return sorted({in_wordlist(perm, wordlist): score_word(in_wordlist(perm, wordlist)) 
+                    for perm in permutations(chars) if in_wordlist(perm, wordlist)}.iteritems(),
                   key=itemgetter(1),
                   reverse=True)
 
