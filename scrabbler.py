@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import sys, itertools
+# Note: requires python 2.7 for argparse and nicer dictionary generator syntax {k:v for (k, v) in [..]}
+
+import sys, itertools, argparse
 from operator import itemgetter
 
 SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
@@ -15,11 +17,15 @@ SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
 # implemented as a hash table) vastly improved things (yay O(1) lookups :)
 def load_dict(dictfile):
     """Load the given dictionary file---strip and lowercase each line, and insert it into the resulting set"""
-    f = open(dictfile, 'r')
-    d = set()
-    for line in f.readlines():
-        d.add(line.strip().lower())
-    return d
+    try:
+        f = open(dictfile, 'r')
+        d = set()
+        for line in f.readlines():
+            d.add(line.strip().lower())
+        return d
+    except IOError as e:
+        print "Failed to open word list: %s" % dictfile
+        exit(1)
 
 def permutations(chars):
     """Returns the permutations of the given set of characters, one by one"""
@@ -37,19 +43,20 @@ def sorted_scored_words(chars, wordlist):
     The tuples are sorted in descending order, highest score first"""
     # Generate a dictionary of {word: score} pairs to eliminate duplicate words
     # Then sort the dictionary by value, converting the dict to a list of tuples and sorting by the second item
-    return sorted({perm: score_word(perm) for perm in permutations(chars) if perm in wordlist}.iteritems(), key=itemgetter(1), reverse=True)
+    return sorted({perm: score_word(perm) for perm in permutations(chars) if perm in wordlist}.iteritems(), 
+                  key=itemgetter(1),
+                  reverse=True)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Please call scrabbler with one argument, a list of characters to use"
-        exit(0)
 
-    chars = sys.argv[1].lower()
-    if len(chars) != 7:
-        print "Please only pass 7 characters, as a scrabble rack only has 7 tiles"
-        exit(0)
+    parser = argparse.ArgumentParser(description='A scrabble solver program')
+    parser.add_argument("characters", help="The scrabble characters to use")
+    parser.add_argument('--dict', action="store", default="sowpods.txt", metavar="wordlist", type=str, help="A user-supplied word list file")
+    p = parser.parse_args()
+    chars = p.characters.lower()
 
-    wordlist = load_dict("sowpods.txt")
+    wordlist = load_dict(p.dict)
+
     words = sorted_scored_words(chars, wordlist)
     print "Got number of words: %s" % len(words)
     for word, score in words:
