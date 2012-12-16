@@ -7,13 +7,14 @@ SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
           "f": 4, "i": 1, "h": 4, "k": 5, "j": 8, "m": 3,
           "l": 1, "o": 1, "n": 1, "q": 10, "p": 3, "s": 1,
           "r": 1, "u": 1, "t": 1, "w": 4, "v": 4, "y": 4,
-          "x": 8, "z": 10}
+          "x": 8, "z": 10, "_": 0}
 
 # Note: First I had load_dict return a list of words that in the dictionary
 # Obviously that was horrifically slow as valid_words was doing an O(n) linear
 # search for each word. Switching it to using a set (which i assume internally is
 # implemented as a hash table) vastly improved things (yay O(1) lookups :)
 def load_dict(dictfile):
+    """Load the given dictionary file---strip and lowercase each line, and insert it into the resulting set"""
     f = open(dictfile, 'r')
     d = set()
     for line in f.readlines():
