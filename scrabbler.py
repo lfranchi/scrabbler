@@ -4,6 +4,7 @@
 
 import sys, itertools, argparse, re
 from operator import itemgetter
+from collections import deque
 
 SCORES = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2,
           "f": 4, "i": 1, "h": 4, "k": 5, "j": 8, "m": 3,
@@ -36,19 +37,21 @@ def score_word(word):
     "Returns a score for the word"
     return sum([SCORES[c.lower()] for c in word])
 
-def expand_blanks(word):
-    """Recursively generate a list of expanded blanks---a list of all permutations possible
+def expand_blanks_iteratively(word):
+    """Iteratively generate a list of expanded blanks---a list of all permutations possible
     when replacing an _ by any character in the alphabet"""
     if not '_' in word:
         return [word]
     expanded = []
-    for i in xrange(len(word)):
-        if word[i] == '_':
-            for word in [word[:i] + c + word[i+1:] for c in ALPHABET]:
-                if not '_' in word:
-                    expanded.append(word)
-                else:
-                    expanded.extend(expand_blanks(word))
+    queue = deque([word])
+    while queue:
+        w = queue.popleft()
+        idx = w.find('_')
+        for new in [w[:idx] + c + w[idx+1:] for c in ALPHABET]:
+            if '_' in new:
+                queue.append(new)
+            else:
+                expanded.append(new)
     return expanded
 
 def in_wordlist(word, wordlist):
@@ -57,7 +60,7 @@ def in_wordlist(word, wordlist):
     empty list."""
     if '_' in word:
         found = []
-        expanded = expand_blanks(word)
+        expanded = expand_blanks_iteratively(word)
         for expanded_word in expanded:
             if expanded_word in wordlist:
                 found.append(expanded_word)
